@@ -1,15 +1,102 @@
+﻿<!-- admin/index.html -->
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Content Manager</title>
 
-  <title>Content Manager</title>
-  <!-- Include the stylesheets from your site here -->
+    <!-- Include the styles for the Netlify CMS UI, after your own styles -->
+    <link rel="stylesheet" href="https://unpkg.com/netlify-cms@^1.0.0/dist/cms.css" />
 
-  <script src="https://identity-js.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
-  <script src="/cms.js"></script>
+    <!-- Include the script that builds the page and powers Netlify CMS -->
+    <script src="https://unpkg.com/netlify-cms@^1.0.0/dist/cms.js"></script>
+    <script>
+
+var CanvasControl = createClass({
+  handleChange: function(e) {
+    this.props.onChange(e.target.value.split(',').map((e) => e.trim()));
+  },
+
+  draw: function() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  ctx.fillRect(0, 0, 75, 75);
+  ctx.fillStyle = '#6C0';
+
+},
+
+erase : function()
+    {
+        //export complete drawing
+        var completeDrawing = document.getElementById("completeDrawingLayer")
+        var image = completeDrawing.toDataURL("image/png").replace("image/png", "image/octet-stream");
+
+        //new element a which is a link (href) to the image : permits download
+        var link = document.createElement('a');
+        link.download = "image.png";
+        link.href = image;
+        link.click();
+    },
+
+ exportt : function()
+    {
+        //export complete drawing
+        var completeDrawing = document.getElementById("completeDrawingLayer")
+        var image = completeDrawing.toDataURL("image/png").replace("image/png", "image/octet-stream");
+
+        //new element a which is a link (href) to the image : permits download
+        var link = document.createElement('a');
+        link.download = "image.png";
+        link.href = image;
+        link.click();
+    },
+
+  render: function() {
+
+    return h('div', {},
+      h('button',{onclick: ()=> this.exportt()}, 'Export'),
+      h('button',{onclick: ()=> this.erase()}, 'Clear all'),
+      h('br'),
+      h('canvas',{id: 'completeDrawingLayer', style :{'background': '#E4F4FB'},height:'100',width:'200'},'canv'),
+      h('br'),
+      h('canvas',{id: 'singleStrokeLayer', style :{'background': '#C0C0C0'}, height:'40',width:'200'},'canv'));
+
+//dans la division on met 2 buttons, un canvas ...
+  }
+});
+CMS.registerWidget('canvasWidget', CanvasControl);
+
+
+CMS.registerEditorComponent({
+  // Internal id of the component
+  id: "canvas",
+  // Visible label
+  label: "Canvas",
+  // Fields the user need to fill out when adding an instance of the component
+  fields: [{name: 'id', label: 'Canvas ID', widget: 'canvasWidget'}],
+  // Pattern to identify a block as being an instance of this component
+  pattern: /^{{< youtube (\S+) >}}$/,
+  // Function to extract data elements from the regexp match
+  fromBlock: function(match) {
+    return {
+      id: match[1]
+    };
+  },
+  // Function to create a text block from an instance of this component
+  toBlock: function(obj) {
+    return `{{< Canvas ${obj.id} >}}`;
+  },
+  // Preview output for this component. Can either be a string or a React component
+  // (component gives better render performance)
+  toPreview: function(obj) {
+    return (
+      `<img src="https://img.youtube.com/vi/${obj.id}/maxresdefault.jpg" alt="Youtube Video"/>`
+    );
+  }
+});
+
+    </script>
 </body>
 </html>
